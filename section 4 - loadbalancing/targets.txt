@@ -1,0 +1,2 @@
+GET http://localhost:10000/pathA
+GET http://localhost:10000/pathB

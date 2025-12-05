@@ -1,0 +1,24 @@
+services:
+  envoy:
+    image: envoyproxy/envoy:v1.34.10
+    ports:
+      - "10000:10000"
+      - "9901:9901"
+    volumes:
+      - ./envoy.yaml:/etc/envoy/envoy.yaml
+    command: /usr/local/bin/envoy -c /etc/envoy/envoy.yaml
+    networks:
+      - app-network
+
+  xds-config-service:
+    build: ../pythonApps/xds-config-service
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../pythonApps/xds-config-service/config.yaml:/app/config.yaml
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

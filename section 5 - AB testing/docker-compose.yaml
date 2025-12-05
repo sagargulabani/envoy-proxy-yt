@@ -1,0 +1,57 @@
+services:
+  envoy:
+    image: envoyproxy/envoy:v1.34.10
+    ports:
+      - "10000:10000"
+      - "9901:9901"
+    volumes:
+      - ./envoy.yaml:/etc/envoy/envoy.yaml
+    command: /usr/local/bin/envoy -c /etc/envoy/envoy.yaml
+    networks:
+      - app-network
+
+  service_a:
+    build: ../pythonApps/serviceA
+    environment:
+      - SERVICE_LETTER=A
+    ports:
+      - "8000:8000"
+    networks:
+      - app-network
+
+  service_b:
+    build: ../pythonApps/serviceA
+    environment:
+      - SERVICE_LETTER=B
+    ports:
+      - "8001:8000"
+    networks:
+      - app-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ../prom-grafana-config/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    networks:
+      - app-network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ../prom-grafana-config/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ../prom-grafana-config/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ../prom-grafana-config/grafana/dashboards:/var/lib/grafana/dashboards
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

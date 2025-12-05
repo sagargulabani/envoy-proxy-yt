@@ -1,0 +1,19 @@
+services:
+  envoy:
+    image: envoyproxy/envoy:v1.34.10
+    ports:
+      - "10000:10000"
+    volumes:
+      - ./envoy.yaml:/etc/envoy/envoy.yaml
+    command: /usr/local/bin/envoy -c /etc/envoy/envoy.yaml
+    networks:
+      - app-network
+
+  service_a:
+    build: ../pythonApps/serviceA
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
